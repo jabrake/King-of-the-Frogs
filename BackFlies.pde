@@ -6,7 +6,7 @@ class BackFlies {
   float maxspeed;
   float maxforce;
   float r;
-
+  
   BackFlies(PVector l) {
     location = l.get();
     velocity = new PVector(random(-1, 1), random(-1, 1));

@@ -28,24 +28,25 @@ PFont CallNumber;
 PFont UserDigits;
 PFont winFont;
 
-boolean gameDefault;
 boolean swampPlayed;
-//boolean poundPressed = false;
+boolean gameDefault = true;
+boolean someoneWon = false; 
 
 int frogCounter = 1;
 int frogWinner;
 int bugCounter, badBugCounter, bugsAdd, badBugsAdd;
 float timeCounter, timePassed;
 
+//Tinyphone client information
 String host = "166.78.150.142";
 int port = 12002;
 String phoneNumber = "1(253)243-3322";
 TinyphoneClient tp;
 
-boolean someoneWon = false; 
-
 void setup() {
+
   size(1300, 850);
+
   minim = new Minim(this);
   swamp = minim.loadFile("swamp.wav");
   ribbit = minim.loadFile("ribbit.wav");
@@ -56,6 +57,7 @@ void setup() {
 
   background = loadImage("lake.jpg");
 
+  //Cycle through frog images for each new caller
   for (int i = 0; i< frog.length; i++) {
     frog[i] = loadImage("frog" + i + ".png" );
   }
@@ -78,12 +80,13 @@ void setup() {
   tp = new TinyphoneClient(this, host, port, phoneNumber);
   tp.start();
 
+  //Initialize bug arrays
   bugs = new ArrayList<Bugs>(); // Create an empty ArrayList
   for (int i =0 ; i < 150; i++) {
     bugs.add(new Bugs(new PVector(random(width), random(height))));
   }
   badBugs = new ArrayList<Bugs>(); // Create an empty ArrayList
-  for (int i =0 ; i < 20; i++) {
+  for (int i =0 ; i < 40; i++) {
     badBugs.add(new Bugs(new PVector(random(width), random(height))));
   }
   backflies = new ArrayList<BackFlies>(); // Create an empty ArrayList
@@ -95,6 +98,7 @@ void setup() {
 void draw() {
   image(background, 0, 0);
 
+  //Variables to keep track of bugs so they can be re-added when new game begins
   bugCounter = bugs.size();
   badBugCounter = badBugs.size();
   bugsAdd = 80 - bugCounter;
@@ -103,6 +107,7 @@ void draw() {
   //Timer + boolean for background audio playback
   timePassed = millis() - timeCounter;
 
+  //Control flow for background sound effect
   if (!swampPlayed) {
     swamp.play();
     timeCounter = millis();
@@ -113,24 +118,25 @@ void draw() {
     swampPlayed = false;
   }
 
+  //Run all flies
   for (Bugs b : bugs) {
     b.run();
   }
-
   for (Bugs b : badBugs) {
     b.run();
     b.badBugs();
   }
-
   for (BackFlies b : backflies) {
     b.run();
     b.separate(backflies);
   }
 
+  //Run crown while there is no winner
   if (!someoneWon) {
     crown.run();
   }
-  
+
+  //Apply game mechanics (catching good/bad flies and win state) for all callers
   synchronized(callers) {
     for (int i = 0; i < callers.size(); i++) {
       Caller c = callers.get(i);
@@ -161,19 +167,28 @@ void draw() {
     }
   }
 
-//  if (poundPressed) {
-//    gameDefault = false;
-//    noStroke();
-//  }
-  
-  if (frogCounter < 7) {
-    gameDefault = true;
-  }
-  else {
-    gameDefault = false;
-    noStroke();
+  //  if (frogCounter < 2) {
+  //    gameDefault = true;
+  //  }
+  //  else {
+  //    gameDefault = false;
+  //    noStroke();
+  //  }
+
+  //Start game when space bar is pressed
+  if (keyPressed) {
+    if (key == ' ') {
+      gameDefault = false;
+      noStroke();
+    }
   }
 
+  //Switch to true when no players in game
+  if (frogCounter == 1) {
+    gameDefault = true;
+  }
+
+  //Game default mode with instructions when game isn't being played
   if (gameDefault) {
     noStroke();
     fill(0, 200);
@@ -188,17 +203,16 @@ void draw() {
     winribbit.rewind();
     someoneWon = false;
   }
-
+  
+  //Detect winner for all callers
   for (int i = 0; i < callers.size(); i++) {
     Caller c = callers.get(frogWinner);
     if (someoneWon) {
       crown.detectWinner(c.frogLocation);
     }
-    //    else {
-    //      crown.moving();
-    //    }
   }
-
+  
+  //If someone wins, play sound effect and re-add bugs that were eaten
   if (someoneWon) {
 
     winribbit.play();
@@ -212,6 +226,7 @@ void draw() {
   }
 }
 
+//Code executed when new caller is added to game
 public void newCallerEvent(TinyphoneEvent event) {
   Caller caller = new Caller(event.getId(), event.getCallerNumber(), event.getCallerLabel());
   synchronized(callers) {
@@ -222,6 +237,7 @@ public void newCallerEvent(TinyphoneEvent event) {
   }
 }
 
+//Get caller keypresses
 public void keypressEvent(TinyphoneEvent event) {
   synchronized(callers) {
     Caller caller = getCaller(event.getId());
@@ -241,6 +257,7 @@ Caller getCaller(String id) {
   return null;
 }
 
+//Code executed when callers hang upf
 public void hangupEvent(TinyphoneEvent event) {
   synchronized(callers) {
     for (int i = 0; i < callers.size(); i++) {
@@ -253,14 +270,4 @@ public void hangupEvent(TinyphoneEvent event) {
     }
   }
 }
-
-//public void newKeypress(String keypress) {
-//  char keychar = keypress.charAt(0);
-//  switch(keychar) {
-//  case '#':
-//    poundPressed = true;
-//    println("pound pressed");
-//    break;
-//  }
-//}
 

@@ -27,9 +27,6 @@ public class Crown {
     //Go to location of winner
     image(flyingCrown, winLoc.x+20, 10);
     image(bubble, winLoc.x+130, 10);
-    //    fill(100, 0, 0);
-    //    textFont(winFont, 60);
-    //    text("We Have A Winner!", width/2-200, height/2);
     imageMode(CENTER);
     image(winMsg, width/2, height/2);
     imageMode(CORNER);

@@ -27,7 +27,6 @@ public class Caller {
   boolean tongue9 = false;
 
   boolean catching = false;
-  //  boolean winner = false;
 
   int imageIndex = 0;
 
@@ -59,6 +58,7 @@ public class Caller {
     noStroke();
   }
 
+  //Functions to move up and down based on what fly is eaten
   void moveUp() {
     frogLocation.y -= 30;
     tongueLocation.y -= 30;
@@ -68,7 +68,8 @@ public class Caller {
     frogLocation.y += 30;
     tongueLocation.y += 30;
   }
-
+  
+  //Boolean to determine who wins
   boolean winner() {
     if (frogLocation.y < winThresh) {
       return true;
@@ -77,7 +78,8 @@ public class Caller {
       return false;
     }
   }
-
+  
+  //Function to control tongue direction for all callers
   void tongue() {
 
     if (tongue1) {
@@ -224,7 +226,8 @@ public class Caller {
       popMatrix();
     }
   }
-
+  
+  //Boolean to determine if a fly is eaten or not
   boolean catches (float locX, float locY) {
     if (tongue1) {
       xTT =  tongueLocation.x + sin(radians(-135))*yTongue/2;//tongueLocation.x/2 + xTongue/2;
@@ -271,7 +274,7 @@ public class Caller {
     //  fill(0, 0, 255);
     //  ellipse(locX, locY, 10, 10);
 
-
+    //Distance for collision detection
     distance = dist(xTT, yTT, locX, locY);
     if (distance < 25) {
       return true;
@@ -280,15 +283,11 @@ public class Caller {
       return false;
     }
   }
-
+  
+  //Key presses to trigger tongue direction and sound effects
   public void newKeypress(String keypress) {
 
     char keychar = keypress.charAt(0);
-
-//    if (keychar == '#') {
-//      poundPressed = true;
-//      println(callers.uniqueID);
-//    }
 
     if (!someoneWon) {
       if (!gameDefault) {
